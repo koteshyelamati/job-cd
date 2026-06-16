@@ -312,9 +312,33 @@ def preview(limit: int = 1):
 
 
 @app.command()
-def config():
-    """Configure API keys and settings."""
-    typer.secho("Settings coming soon...", fg=typer.colors.YELLOW)    
+def config(
+    edit: bool = typer.Option(
+        False,
+        "--edit",
+        "--open",
+        help="Open the global .env file in your default editor.",
+    ),
+):
+    """View or edit the global .env configuration file."""
+    if not config_manager.env_path.exists():
+        typer.secho(
+            f"⚠️  No configuration found at {config_manager.env_path}.",
+            fg=typer.colors.YELLOW,
+        )
+        typer.secho("Run 'jobcd init' first to create your configuration.", fg=typer.colors.YELLOW)
+        raise typer.Exit(code=1)
+
+    if edit:
+        typer.secho(
+            "⚠️  Opening your .env file. Treat its contents as secrets — never share or commit them.",
+            fg=typer.colors.YELLOW,
+        )
+        typer.launch(str(config_manager.env_path))
+        return
+
+    typer.secho(f"\n⚙️  Configuration ({config_manager.env_path})\n", fg=typer.colors.BLUE, bold=True)
+    typer.echo(config_manager.env_path.read_text(encoding="utf-8"))
 
 if __name__ == "__main__":
     app()
